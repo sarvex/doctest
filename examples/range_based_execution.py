@@ -13,9 +13,7 @@ if len(sys.argv) < 2:
 num_tests = 0
 
 program_with_args = [sys.argv[1], "--dt-count=1"]
-for i in range(2, len(sys.argv)):
-    program_with_args.append(sys.argv[i])
-
+program_with_args.extend(sys.argv[i] for i in range(2, len(sys.argv)))
 result = subprocess.Popen(program_with_args, stdout = subprocess.PIPE).communicate()[0]
 result = result.splitlines(True)
 for line in result:
@@ -27,7 +25,7 @@ cores = multiprocessing.cpu_count()
 l = range(num_tests + 1)
 n = int(math.ceil(float(len( l )) / cores))
 data = [l[i : i + n] for i in range(1, len( l ), n)]
-data = tuple([[x[0], x[-1]] for x in data])
+data = tuple([x[0], x[-1]] for x in data)
 
 # for 8 cores and 100 tests the ranges will look like this
 # ([1, 13], [14, 26], [27, 39], [40, 52], [53, 65], [66, 78], [79, 91], [92, 100])

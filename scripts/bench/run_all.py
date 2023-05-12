@@ -27,39 +27,37 @@ if os.name == "nt":
     call = 'python bench.py'
     the_os = 'windows'
 
-f = open('results.txt', 'w')
-for test in ['header', 'asserts', 'runtime']:
-    print(  '\n************** ' + test + '\n')
-    f.write('\n************** ' + test + '\n')
-    f.flush()
-    for framework in ['doctest', 'catch']:
-        print(  '== ' + framework + '\n')
-        f.write('== ' + framework + '\n')
+with open('results.txt', 'w') as f:
+    for test in ['header', 'asserts', 'runtime']:
+        print(  '\n************** ' + test + '\n')
+        f.write('\n************** ' + test + '\n')
         f.flush()
-        for config in data['compilers'][the_os]:
-            for curr in data[test][1]:
-                if curr[0] == framework or curr[0] == "any":
-                    command = call + data[test][0] + config + curr[1] + (' --catch' if framework == 'catch' else '')
-                    print(command)
-                    
-                    accum = float(0)
-                    num_times = 0
-                    for i in range(0, average_num_times):
-                        res = float(runBench(command))
-                        print(res)
-                        accum += res
-                        num_times += 1
-                        
-                        if accum > max_accum_time:
-                            break
-                    
-                    average = "{:7.2f}".format(round(accum / num_times, 2))
-                    print("AVERAGE: " + average)
-                    f.write(average + " | ")
-                    f.flush()
-            f.write("\n")
+        for framework in ['doctest', 'catch']:
+            print(f'== {framework}' + '\n')
+            f.write(f'== {framework}' + '\n')
             f.flush()
+            for config in data['compilers'][the_os]:
+                for curr in data[test][1]:
+                    if curr[0] in [framework, "any"]:
+                        command = call + data[test][0] + config + curr[1] + (' --catch' if framework == 'catch' else '')
+                        print(command)
 
-f.close()
+                        accum = float(0)
+                        num_times = 0
+                        for _ in range(0, average_num_times):
+                            res = float(runBench(command))
+                            print(res)
+                            accum += res
+                            num_times += 1
+
+                            if accum > max_accum_time:
+                                break
+
+                        average = "{:7.2f}".format(round(accum / num_times, 2))
+                        print(f"AVERAGE: {average}")
+                        f.write(f"{average} | ")
+                        f.flush()
+                f.write("\n")
+                f.flush()
 
 

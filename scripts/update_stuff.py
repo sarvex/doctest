@@ -18,27 +18,23 @@ print("updating the version in the header file")
 doctest_contents = ""
 for line in fileinput.input(["../doctest/parts/doctest_fwd.h"]):
     if line.startswith("#define DOCTEST_VERSION_MAJOR "):
-        doctest_contents += "#define DOCTEST_VERSION_MAJOR " + version_major + "\n"
+        doctest_contents += f"#define DOCTEST_VERSION_MAJOR {version_major}" + "\n"
     elif line.startswith("#define DOCTEST_VERSION_MINOR "):
-        doctest_contents += "#define DOCTEST_VERSION_MINOR " + version_minor + "\n"
+        doctest_contents += f"#define DOCTEST_VERSION_MINOR {version_minor}" + "\n"
     elif line.startswith("#define DOCTEST_VERSION_PATCH "):
-        doctest_contents += "#define DOCTEST_VERSION_PATCH " + version_patch + "\n"
+        doctest_contents += f"#define DOCTEST_VERSION_PATCH {version_patch}" + "\n"
     else:
         doctest_contents += line
 
-readme = open("../doctest/parts/doctest_fwd.h", "w")
-readme.write(doctest_contents)
-readme.close()
-
+with open("../doctest/parts/doctest_fwd.h", "w") as readme:
+    readme.write(doctest_contents)
 # update meson file with version
 print("updating the meson file")
-meson_contents = ""
-for line in fileinput.input(["../meson.build"]):
-    if line.startswith("project('doctest'"):
-        meson_contents += "project('doctest', ['cpp'], version: '" + version + "')\n"
-    else:
-        meson_contents += line
-
-meson = open("../meson.build", "w")
-meson.write(meson_contents)
-meson.close()
+meson_contents = "".join(
+    f"project('doctest', ['cpp'], version: '{version}" + "')\n"
+    if line.startswith("project('doctest'")
+    else line
+    for line in fileinput.input(["../meson.build"])
+)
+with open("../meson.build", "w") as meson:
+    meson.write(meson_contents)
